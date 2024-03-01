@@ -1,4 +1,4 @@
-# cs50p_project
+# Linear Algebra Calculator
 This is my CS50P final project, Linear Algebra Calculator. This is simple GUI application, implmented in python using tkinter library that can proform basic vector and matrix operations. 
 
 I have used tkinter library to implement GUI.
@@ -45,7 +45,8 @@ Linear Algebra is based on objects known as vectors and matrices. Both vectors a
   If you have any suggestions or coomnts, please kindly provide it to me.
   Thanks
 
-      
-
+  Here are some screenshots (of youtube video) of the application:
+  
+  
 
 
