@@ -104,13 +104,17 @@ class Vector:
         :return: dot product 
         :rtype: float
         :raise ValueError: If dimensions of two vectors are not matched
+        :raise ValueError : If error occurs in dot product operation
 
         '''
         dim_1 = a.dim
         dim_2 = b.dim
         
         if dim_1 == dim_2:
-            return sum(a_cord * b_cord for a_cord, b_cord in zip(a.cords, b.cords))
+            try:
+                return sum(a_cord * b_cord for a_cord, b_cord in zip(a.cords, b.cords))
+            except ValueError:
+                raise ValueError("Error in dot product operation")
         else:
             raise ValueError("Not same dimensions!")
 
@@ -341,7 +345,7 @@ class Matrix():
             
             try:
                 transpose = other.transpose()  
-                c = [Vector([Vector.dot(self.rows[i], transpose.rows[j]) for j in range(self.n) for i in range(self.m)])]
+                c = [Vector([Vector.dot(self.rows[i], transpose.rows[j]) for j in range(other.m)]) for i in range(self.m)]
             except ValueError:
                 raise ValueError("Error in dot product operation")
             else:
@@ -360,14 +364,24 @@ class Matrix():
 
         '''
         # Empty list to store rows as vectors
-        transpose = [Vector([row.cords[i] for row in self.rows for i in range(self.n)])]
+        transpose = [Vector([row.cords[i] for row in self.rows]) for i in range(self.n)]
 
         return Matrix(transpose)
     
 
     # Lower triangularise
-    def triangularise(matrix):
-        # matrix is Matrix
+    @classmethod
+    def triangularise(matrix: 'Matrix') -> 'Matrix':
+        '''
+        This is a classmethod
+        Convert a given matrix into a lower triangular matrix.
+
+        :param matrix: Matrix to be triangularised
+        :return: Modified lower triangularised matrix
+        :rtype: Matrix
+        :raise ValueError: if zero division occurs
+
+        '''
         rows = matrix.rows
         m = matrix.m
         n = matrix.n
@@ -375,19 +389,32 @@ class Matrix():
         for p in range(m):
             Matrix.pivoting(matrix, m, p)
             for i in range(p + 1, m):
-                factor = rows[i].cords[p] / rows[p].cords[p]
-                rows[i] = rows[i] - (rows[p] * factor)
-        
+                try:
+                    factor = rows[i].cords[p] / rows[p].cords[p]
+                    rows[i] = rows[i] - (rows[p] * factor)
+                except ZeroDivisionError:
+                    raise ValueError('Zero division error')
+            
         return Matrix(rows)
     
-        
-    def pivoting(matrix, m, p):
+    @classmethod
+    def pivoting(matrix: 'Matrix', m: int, p: int) -> 'Matrix':
+        '''
+        This is a classmethod
+        Convert a given matrix into a pivoted matrix.
+
+        :param matrix: Matrix to be triangularised
+        :param m: number of rows
+        :param p: pivot row
+
+        :return: Pivoted matrix
+        :rtype: Matrix
+
+        '''
         tmp = []
-        a = []
         b = []
 
-        for row in matrix.rows:
-            a.append(row.cords)
+        a = [row.cords for row in matrix.rows]
 
         max_row = p
         
@@ -400,25 +427,27 @@ class Matrix():
             a[p] = a[max_row]
             a[max_row] = tmp
         
-        for row in a:
-            b.append(Vector(row))
-
+        b = [Vector(row) for row in a]
         return Matrix(b)
 
-    # Back substitution
-    # returns list of ordered x values
-    def back(matrix):
-        rows = []
-        for vector in matrix.rows:
-            rows.append(vector.cords)
+    @classmethod
+    def back(matrix: 'Matrix') -> Vector:
+        '''
+        This is a classmethod
+        Convert a given matrix into a solution vector
+
+        :param matrix: Matrix to be solved
+
+        :return: solution vector
+        :rtype: Vector
+        '''
+        rows = [vector.cords for vector in matrix.rows]
 
         m = matrix.m
         n = matrix.n
-        x = []
+        x = [0 for _ in range(n - 1)]
         
-        for i in range(n -1):
-            x.append(0)
-
+        # Back substitution algorithm
         try:
             x[m - 1] = rows[m - 1][n - 1] / rows[m - 1][n - 2]
 
@@ -428,6 +457,7 @@ class Matrix():
                     x[i] = x[i] - rows[i][j] * x[j]
 
                 x[i] = x[i]/rows[i][i]
+
         except ZeroDivisionError:
             return None
         return x
