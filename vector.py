@@ -48,16 +48,21 @@ class Vector:
         return f"{self.cords}, r = {self.length:.2f}"
         
 
-    def __add__(self,other):
+    def __add__(self, other: 'Vector') -> 'Vector':
+        '''
+        :param other: vector to add
+        :type other: vector
+        :return: Added vector
+        :rtype: vector
+
+        '''
         dim_1 = self.dim
         dim_2 = other.dim
         
         if dim_1 == dim_2:
-            
-            added_cords = []
-            for i in range(dim_1):
-                added_cords.append(self.cords[i] + other.cords[i])
+            added_cords = [self.cords[i] + other.cords[i] for i in range(dim_1)]
             return Vector(added_cords)
+        
         elif dim_1==0:
             return other
         elif dim_2 == 0:
@@ -65,16 +70,20 @@ class Vector:
         else: 
             raise ValueError("Can't add vectors of different dimension!")
     
-    def __sub__(self, other):
+    def __sub__(self, other: 'Vector') -> 'Vector':
+        '''
+        :param other: vector to be subtract
+        :type other: vector
+        :return: Subtracted vector
+        :rtype: vector
+
+        '''
         dim_1 = self.dim
         dim_2 = other.dim
         
         if dim_1 == dim_2:
             
-            subtract_cords = []
-            
-            for i in range(dim_1):
-                subtract_cords.append(self.cords[i] - other.cords[i])
+            subtract_cords = [self.cords[i] - other.cords[i] for i in range(dim_1)]
             return Vector(subtract_cords)
         
         elif dim_1==0:
@@ -86,29 +95,43 @@ class Vector:
         else: 
             raise ValueError("Can't subtract vectors of different dimension!")
     
+
     @classmethod
-    def dot(cls, a, b):
+    def dot(cls, a: 'Vector', b: 'Vector') -> float:
+        '''
+        :param a, b: dot product vectors
+        :type a, b: vector
+        :return: dot product 
+        :rtype: float
+        :raise ValueError: If dimensions of two vectors are not matched
+
+        '''
         dim_1 = a.dim
         dim_2 = b.dim
         
         if dim_1 == dim_2:
-            sum = 0
-
-            for i in range(dim_1):
-                sum = sum + (a.cords[i] * b.cords[i])
-            return sum
+            return sum(a_cord * b_cord for a_cord, b_cord in zip(a.cords, b.cords))
         else:
             raise ValueError("Not same dimensions!")
 
+
     # 2x2 Determinant
     @classmethod
-    def det(cls, a, b):
+    def det(cls, a: 'Vector', b: 'Vector') -> float:
         return (a[0] * b[1]) - (a[1] * b[0])
 
     # Only 3D
     # Implemented in view of C language
     @classmethod
-    def cross(cls, p, q):
+    def cross(cls, p: 'Vector', q: 'Vector') -> 'Vector':
+        '''
+        :param p, q: cross product vectors
+        :type p, q: vector
+        :return: cross product 
+        :rtype: Vector
+        :raise ValueError: If dimensions of two vectors not 3
+
+        '''
         if p.dim == q.dim and p.dim == 3:
             
                 a = p.cords
@@ -136,30 +159,41 @@ class Vector:
         return Vector(c) 
            
                 
-    def __mul__(self, other):
+    def __mul__(self, other) -> 'Vector':
+        '''
+        Multiplies Vector by scalar
+        :param other: scaler to multiply
+        :type other: int, float
+        :return: scaler multipled vector 
+        :rtype: Vector
+        :raise ValueError: if scaler is not passed after * operator
+
+        '''
         # scalar must be on right side of operator *
         if type(other) in [int, float]:
-            multiplied = []
-
-            for i in range(0, self.dim):
-                multiplied.append(self.cords[i] * other)
-        
+            multiplied = [cord * other for cord in self.cords]
             return Vector(multiplied)
+        
         else:
             raise ValueError("Invalid operand passed to operator *")
 
     def normalise(self):
-            if self.length != 0:
-                return self * (1 / self.length)
+        '''
+        :return: Normalised Vector 
+        :rtype: Vector
+        :raise ZeroDivisionError: If 0 vector passed
 
-            else :
-                raise ValueError("Cannot normalise zero vector!")
+        '''
+        if self.length != 0:
+            return self * (1 / self.length)
+
+        else :
+            raise ZeroDivisionError("Cannot normalise zero vector!")
 
     # Get angle between two vectors
     @classmethod
-    def get_angle(cls, vector1, vector2):
+    def get_angle(cls, vector1, vector2) -> float:
         if not (isinstance(vector1, Vector) and (isinstance(vector2, Vector))):
-            print("Inputs are not vectors!")
             return None
         
         product = cls.dot(vector1, vector2)
@@ -175,8 +209,15 @@ class Vector:
 
 
 class Matrix():
-    # vectors is list ov Vector objects i.e, rows of given matrix in order
     def __init__(self, vectors):
+        '''
+        Matrix is a collection of row vectors in order
+        attributes:
+        rows: list of row vectors in ascendig order
+        m : number of rows
+        n: number of columns
+
+        '''
         # List of rows
         self.rows = []
 
@@ -188,15 +229,18 @@ class Matrix():
 
             for vector in vectors:
                 if len(vector.cords) != self.n:
-                    print(f"{vector.cords} does not contain same number of entries a first vector!")
-                    return None
+                    raise ValueError(f"{vector.cords} does not contain same number of entries a first vector!")
+
                 self.rows.append(vector)
         else:
             self.n = 0
 
     # Create a matrix from list of row vectors
     @classmethod
-    def get_matrix(cls):
+    def get_matrix(cls) -> 'Matrix':
+        '''
+        driver method not meant to be part of application
+        '''
         cords = []
 
         try:
@@ -221,31 +265,46 @@ class Matrix():
         return Matrix(cords)
 
 
-    def __add__(self, other):
+    def __add__(self, other: 'Matrix') -> 'Matrix':
+        '''
+        Adds two matrices
+
+        :param other: Matrix to add
+        :return: Added matrix
+        :rtype: Matrix
+
+        '''
         if self.m == 0:
             return other
         elif other.m == 0:
             return self
         else:
-            added = []
-            for i in range(self.m):
-                added.append(self.rows[i] + other.rows[i]) 
+            added = [self_row + other_row for self_row, other_row in zip(self.rows, other.rows)]
             return (Matrix(added))
 
+    def __sub__(self, other: 'Matrix') -> 'Matrix':
+        '''
+        Subtracts other matrix from self matrix
 
-    def __sub__(self, other):
-        if self.m == 0:
-            return other
-        elif other.m == 0:
-            return self
+        :param other: Matrix to subtract
+        :return: Subtracted matrix
+        :rtype: Matrix
 
-        sub = []
-        for i in range(self.m):
-            sub.append(self.rows[i] - other.rows[i]) 
+        '''
+        if self.m == 0 or other.m == 0:
+            raise ValueError("Empty matrix incompatible with operation")
+
+        sub = [self_row - other_row for self_row, other_row in zip(self.rows, other.rows)]
         return Matrix(sub)
 
 
     def __str__(self):
+        '''
+        returns matrix in string format eg.
+        [ [1, 2, 3]
+         [3, 2, 1]
+         [7, 5, 0] ]
+        '''
         string = "["
         for i in self.rows:
             string += f"  {i.cords}\n"
@@ -254,51 +313,54 @@ class Matrix():
         return string
 
 
-    def __mul__(self,other):
+    def __mul__(self, other: 'Matrix') -> 'Matrix':
+        '''
+        Multiples self matrix times other matrix
+        Matrix multiplication is not implemented using standard algorithm but using abstaction of row vectors.
+        Not efficient but good enough for application at hand
+
+
+        :param other: Matrix to multiply
+        :return: Multipled matrix
+        :rtype: Matrix
+        :raise ValueError: if dimensions of matrices are incompatible for multiplication
+
+        '''
 
         # Scalar multiplication
         if(type(other) in [int, float]):
-            product = []
-            for row in self.rows:
-                product.append(row * other)
+            
+            product = [row * other for row in self.rows]
             return Matrix(product)
         
-        # Multiplication of two matrices
-        elif (type(other) == Matrix):
+        # Matrix Multiplication
+        elif (isinstance(other, Matrix)):
+            
             if self.n != other.m:
                 raise ValueError("Cannot multiply these matrices!")
-
-            c = []
-            transpose = other.transpose()
             
-            for i in range(self.m):
-                tmp = []
-                for j in range(other.n):
-                    try: 
-                        tmp.append(Vector.dot(self.rows[i], transpose.rows[j]))
-                    except ValueError:
-                        sys.exit("Error in dot product operation!")
-                c.append(Vector(tmp))
-            
-            return Matrix(c)
-        else:
-
-            raise ValueError("Invalid Matrix(ces) in multiplying operation!")
-
-
-    def transpose(self):
-        # Empty list to store rows as vectors
-        transpose = []
+            try:
+                transpose = other.transpose()  
+                c = [Vector([Vector.dot(self.rows[i], transpose.rows[j]) for j in range(self.n) for i in range(self.m)])]
+            except ValueError:
+                raise ValueError("Error in dot product operation")
+            else:
+                return Matrix(c)
         
-        # Iterate over columns
-        for i in range(self.n):    
-            tmp = []
-            # Iterate over rows 
-            for row in self.rows:
-                tmp.append(row.cords[i])
-            
-            # Matrix expects list of vectors 
-            transpose.append(Vector(tmp))
+        else:
+            raise ValueError("Invalid Matrix(s) in multiplying operation!")
+
+
+    def transpose(self)->'Matrix':
+        '''
+        Transposes current matrix.
+
+        :return: Transposed matrix
+        :rtype: Matrix
+
+        '''
+        # Empty list to store rows as vectors
+        transpose = [Vector([row.cords[i] for row in self.rows for i in range(self.n)])]
 
         return Matrix(transpose)
     
