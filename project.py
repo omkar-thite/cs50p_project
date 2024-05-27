@@ -18,10 +18,14 @@ VECTOR = "vector"
 MATRIX = "matrix"
 SCALAR = "scalar"
 
+
 class MyApp:
-    custom_font = ("Arial", 18)
+    custom_font = ("Haveltica", 16)
 
     def __init__(self, root):
+        '''
+        Initialse variables and display home window
+        '''
         self.root = root
         self.root.title("linear algebra")
         self.root.geometry("+100+100")
@@ -37,24 +41,27 @@ class MyApp:
         ttk.Button(self.container, text="Matrix", command=partial(MatrixOps, self), padding=25).grid(column=1, row=2, sticky=E, padx=25)
         tk.Frame(self.container, height=50).grid(column=0, row=3)
 
-###############################################################################################################################################
         
     def new_window(self):
+        '''
+        Destroys current window and replaces with new one
+        '''
         self.container.destroy()
 
         self.container = ttk.Frame(self.root)
         self.container.grid(column=0, row=0, sticky=(N,W,E,S), padx=10, pady=(0,50))
         
-
-###############################################################################################################################################
     
     def create_button(self, text, command, column, row, sticky, padx=0, pady=0, columnspan=1,  padding=0):
+        '''
+        Creates and places button widget
+        '''
         button = ttk.Button(self.container, text=text, command=command, padding=padding)
         button.grid(column=column, row=row, sticky=sticky, padx=padx, pady=pady, columnspan=columnspan)
 
         return button
 
-########################################################################################################################################################    
+    
   
     def back(self, prev):
         self.container.destroy()
@@ -67,7 +74,7 @@ class MyApp:
             self.new_window()
             VectorOps(self)
 
-################################################################################################################
+
     # Home windows for vector and matrix operations
     def home_window(self, mode):
 
@@ -115,13 +122,23 @@ class VectorOps(MyApp):
 
  ##############################################################################################################################################################################3
     
-    # return dictionery of entries and last row in grid
-    # takes number of entries to create n, starting column and row in grid config
-    def create_entry(self, n, col, row, width=10):
+    def create_entry(self, n: int, col: int, row: int, width=10) -> tuple:
+        '''
+        Creates a label and an entry widget for input vector
+        Returns tuple of a dict object of placed entries with serial integer numbers as keys and number of last row in grid
+
+        Parameters:
+        n = number of entries to make
+        col = column to place entry
+        row = row number to place entry
+        width = width of entry widget
+        '''
         input = {}
 
         for i in range(1, n+1):
+            # Place a label
             ttk.Label(self.container, text=f"vector {i}: ", font=self.custom_font).grid(column=col, row=row, pady=15)
+            
             vector = ttk.Entry(self.container, width=width)
             input[f"{i}"] = vector
             vector.grid(column=col+1, row=row, pady=10, sticky=W)
@@ -133,37 +150,36 @@ class VectorOps(MyApp):
     
     # takes dictionary of entry widgets in kwargs
     # returns list of extracted Vector(s)
-    def entry_to_vectors(self, **kwargs):
-        # number of vectors, n, is passed from previous function call
-        tmp = []
-        vectors = []
+    def entry_to_vectors(self, **kwargs) -> list:
+        '''
+        Converts entry widgets input to Vector objects
 
-        # value are vectors in string format
-        for key, value in kwargs.items():
-            tmp.append(value)
+        Parameters:
+        kwargs = expected a dictionary of entry widgets
+
+        '''
+        # number of vectors, n, is passed from previous function call
+        tmp = [value for _, value in kwargs.items()]
         
         try:
-            for vector in tmp:
-                vectors.append(vector.strip().split(" "))
-            
+            vectors = [text_vector.strip().split(" ") for text_vector in tmp]
             total_vectors = len(vectors)
             
+            # Converts str values to int
             for i in range(total_vectors):
                 vector_length = len(vectors[i])
 
                 for j in range(vector_length):
                     vectors[i][j] = int(vectors[i][j])
-
-         #IndexError if dim of vectors not same
-
+            
+        #IndexError if dim of vectors not same
         except (IndexError, ValueError):
             messagebox.showerror("Error 3", "Invalid input. error_code=3")
             return
         
         else: 
-            for i in range(total_vectors):
-                vectors[i] = Vector(vectors[i])
-        
+            vectors = [Vector(vector) for vector in vectors]
+       
         return vectors
 
 ##############################################################################################################################################################################3
@@ -174,13 +190,15 @@ class VectorOps(MyApp):
 
         if operation == ADD:
             ttk.Label(self.container, text="Number of vectors to add: ", font=self.custom_font).grid(column=0, row=2, columnspan=2, pady=15) 
+
         elif operation == SUBTRACT:
             ttk.Label(self.container, text="Number of vectors to subtract: ", font=self.custom_font).grid(column=0, row=2, columnspan=2, pady=15) 
+
         ttk.Button(self.container, text="Back", command=lambda: self.back(prev="vector")).grid(column=0, row=0, sticky= W, pady=(0, 50))
        
         number = ttk.Entry(self.container)
         number.grid(column=0, row=3, pady=10)
-        # set cursor on entry
+        # Set cursor on entry
         number.focus_set()
 
         # bind Enter key to entry
@@ -211,7 +229,6 @@ class VectorOps(MyApp):
         else:
             input, last_row = self.create_entry(n, 0, 3)
             
-            
             # Focus cursor on first entry widget    
             input["1"].focus_set()
 
@@ -234,36 +251,31 @@ class VectorOps(MyApp):
         home.grid(column=1, row=0, sticky=E)
 
         # number of vectors, n, is passed from previous function call
-        tmp = []
-        vectors = []
-
-        for key, value in kwargs.items():
-            tmp.append(value)
+        tmp = [value for _, value in kwargs.item()]
         
         try:
-            for vector in tmp:
-                vectors.append(vector.strip().split(" "))
-            
+            vectors = [vector.strip().split(" ") for vector in tmp]
             vector_length = len(vectors[0])
 
             for i in range(len(vectors)):
+                
                 if len(vectors[i]) != vector_length:
-                    raise ValueError("Vectores length different!")
-                for j in range(vector_length):
-                    vectors[i][j] = int(vectors[i][j])
+                    raise ValueError("Cannot add vectors of different length!")
+                
+            vectors = [[int(element) for element in vector] for vector in vectors]
          
         except ValueError:
             messagebox.showerror("Error 3", "Invalid input. error_code=3")
             self.vector_add_gui_2(n, operation)
         
         else: 
-            for i in range(n):
-                vectors[i] = Vector(vectors[i])
-
+            vectors = [Vector(vector) for vector in vectors]
+         
             sum = vectors[0]
             if operation == ADD:
                 for vector in vectors[1:]:
                     sum += vector
+                    
             elif operation == SUBTRACT:
                 for vector in vectors[1:]:
                     sum -=  vector
@@ -300,6 +312,7 @@ class VectorOps(MyApp):
 ##############################################################################################################################################################################3
     
     # Dot, Cross product and get angle implementation
+    # Implements GUI logic
     def product(self, operation=""):
         self.new_window()
 
@@ -316,7 +329,7 @@ class VectorOps(MyApp):
 
         input, last_row = self.create_entry(n, col, row+1)
     
-    # Focus cursor on first entry widget    
+        # Focus cursor on first entry widget    
         input["1"].focus_set()
 
         # press Enter for next entry
@@ -329,10 +342,12 @@ class VectorOps(MyApp):
         # create dictionary which has all vectors and pass it to same addition function
         ttk.Button(self.container, text="Enter", command=lambda : self.product_2(self.entry_to_vectors(**{key : input[key].get() for key in input}), col, last_row, operation)).grid(column=col, row=last_row + 1, padx=25, sticky=E)
         last_row += 1
-    
+
+##############################################################################################################################################################################
+    # Implements operations
     def product_2(self, vectors, col, last_row, operation=""):
         
-        home = ttk.Button(self.container, text="Home", command=partial(self.__init__,self.app_object))
+        home = ttk.Button(self.container, text="Home", command=partial(self.__init__, self.app_object))
         home.grid(column=1, row=0, sticky=E)
 
     # assuming all goes well and vectors list containes 2 vectors
@@ -380,7 +395,6 @@ class VectorOps(MyApp):
         scalar.grid(column=col+1, row=last_row-1, pady=15)
         input["scalar"] = scalar
         last_row += 1
-
     
     # Focus cursor on first entry widget    
         input["1"].focus_set()
@@ -394,7 +408,12 @@ class VectorOps(MyApp):
         return
     
     # takes a list of vectors
-    def scalar2(self, vectors, col, last_row):
+    def scalar2(self, vectors: 'Vector', col: int, last_row: int) -> None:
+        '''
+        Takes list of two vectors one of which is a scalar (vector with one entry)
+        Displays result on app screen
+
+        '''
         home = ttk.Button(self.container, text="Home", command=partial(self.__init__,self.app_object))
         home.grid(column=1, row=0, sticky=E)
 
@@ -417,8 +436,12 @@ class VectorOps(MyApp):
             return
 ##############################################################################################################################################################################3
     
-    # Displays general proerties of a vector
+    # General proerties of a vector
+
     def vector_properties(self):
+        '''
+        Displays gui for operation
+        '''
         self.new_window()
 
         col = 0
@@ -436,6 +459,9 @@ class VectorOps(MyApp):
         ttk.Button(self.container, text="Enter", command=lambda : self.vector_properties2(self.entry_to_vectors(**{key : input[key].get() for key in input}), col, last_row+1)).grid(column=col, row=last_row + 1, padx=25, sticky=E)
 
     def vector_properties2(self, vectors, col, last_row):
+        '''
+        Calculates vector properties and displays them
+        '''
         self.new_window()
         self.create_button("Back", partial(self.vector_properties), 0, 0, W)
         home = ttk.Button(self.container, text="Home", command=partial(self.__init__,self.app_object))
@@ -461,7 +487,7 @@ class VectorOps(MyApp):
 
 ##############################################################################################################################################################################3
             
-    # supported operations dictionary for GUI buttons
+    # Supported operations dictionary for GUI buttons
     operations = {
 
                     "Addition": vector_add_gui_1,
@@ -485,14 +511,23 @@ class MatrixOps(MyApp):
 
 ##############################################################################################################################################################################3
 
-    # Returns crerated matrices dictionary {1: matrix1, 2: matrix2, ...}
-    # n i s number of matrices to create
-    # rows is number of rows of matrix
-    # columns is number of columns of matrix
-    # col is current col in grid
-    # last_row is current last row in grid
-    # numbering will start one digit ahead of label_start, deafult starts from 1 when label_start is 0
+    
     def create_matrix(self, n, rows, columns, col, last_row, islabel=True, label_start=0):
+        '''
+        Creates given number of matrices with same with same dimensions and their labels, places them on GUI according to args rows and columns.
+        
+        Returns dict of created matrix objects as values and serial numbers as keys. {1: matrix1, 2: matrix2, ...}
+    
+        Parameters:
+        n (int) : Number of matrices to create
+        rows (int) : Number of rows of matrix(s)
+        columns (int) : Number of columns of matrix(s)
+        col (int) : Current column in grid
+        last_row (int) : Current last row of grid
+        islabel (bool): Label matrices if True else not.
+        label_start (int) : Start labelling matrices from this number
+
+        '''
         matrices = {}
 
         row = last_row + 1
@@ -513,6 +548,7 @@ class MatrixOps(MyApp):
                 place_column = col
                 row_entries = []
                 matrix.append(row_entries)
+                
                 # iterate for columns
                 for _ in range (columns):
                     current_entry = ttk.Entry(mframe, width=5)
@@ -527,7 +563,22 @@ class MatrixOps(MyApp):
 ##############################################################################################################################################################################3
     
     # Set focus on succesive matrix entries upon Enter button is pressed
-    def focus(self, i,j,k,rows,columns,number_of_matrix,matrices):
+    def focus(self, i, j, k, rows, columns, number_of_matrix, matrices):
+        '''
+        Sets focus on successive matrix entries when Enter(or tab) is pressed by user
+        
+        Parameters:
+        i (int) = row number of a matrix
+        j (int) = column number of a matrix
+        k (int) = Matrix's serial number
+
+        rows (int) = Number of rows in  a matrix
+        columns (int) = Number of columns in a matrix
+        number_of_matrix = total number of matrices
+        matrices = Three dimensional list of matrices which are in form of lists
+
+        matrix[k][i][j] gives j'th entry of i'th row of k'th matrix
+        '''
 
         if j != columns - 1:
             matrices[k][i][j + 1].focus_set()
@@ -541,9 +592,19 @@ class MatrixOps(MyApp):
                     return
 ##############################################################################################################################################################################3
                 
-    # Returns dictionary of Matrix objects with ordered number as a key as in {1: Matrix1, 2: Matrix2, ...}
-    # matrices is a dict of (row)lists of matrix entries (here returned from create_matrix())
     def get_matrix_objects(self, number_of_matrix, rows, columns, matrices):
+        '''
+        Converts list(s) into Matrix(s) objects
+        Returns dict where Converted Matrix objects are values and serial number are keys starting from 1 as in {1: Matrix1, 2: Matrix2, ...}
+
+        Parameters:
+        number_of_matrix (int) = total number of matrices to convert
+        rows (int) = rows of matrix(s)
+        columns (int) = columns of matrix(s)
+        matrices = list of matrix lists [[[mat1row1], [mat1row2], ...]
+                                            [mat2row1], mat2row2],...]
+                                            ...]
+        '''
         matrix_dict = {}
 
         for k in range(1, number_of_matrix + 1):
@@ -575,8 +636,11 @@ class MatrixOps(MyApp):
     
 ##############################################################################################################################################################################3
 
-    # Matrix Addition or Subtraction implementation 
     def matrix_add(self, operation=ADD):
+        '''
+        This thread implemetns Addition and Subtraction operations as both require similar GUI with minor changes
+        '''
+  
         self.new_window()
         self.create_button("Back", partial(self.__init__, self.app_object), 0, 0, W, pady=5)
 
@@ -606,6 +670,7 @@ class MatrixOps(MyApp):
 
 
     def matrix_add_gui2(self, n, dimensions, operation=ADD):
+        
         self.new_window()
         self.create_button("Back", partial(self.matrix_add), 0, 0, W)
 
@@ -808,6 +873,9 @@ class MatrixOps(MyApp):
 ##############################################################################################################################################################################3
     # Transpose Or Gauss eliminate function thread
     def transpose_matrix(self, operation="transpose"):
+        '''
+        This thread implements Gauss elimination and transpose operations as both require similar GUI
+        '''
         self.new_window()
         self.create_button("Back", partial(self.__init__, self.app_object), 0, 0, W, pady=5)
 
