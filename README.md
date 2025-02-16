@@ -1,4 +1,22 @@
 # Matrix Calculator
+
+Here are some screenshots of the application run on Linux Ubuntu:
+  ![alt text](screenshots/home_window.png)
+  ![alt text](screenshots/vector_window.png)
+  ![alt text](screenshots/general_vector_input.png)
+  ![alt text](screenshots/general_vector_result.png)
+  ![alt text](screenshots/input_result_vector.png)
+  ![alt text](screenshots/matrix_window.png)
+  ![alt text](screenshots/general_matrix_input.png)
+
+  
+  ![alt text](screenshots/general_matrix_input2.png)
+  ![alt text](screenshots/general_matrix_input3.png) 
+
+  
+  ![alt text](screenshots/general_matrix_result.png)
+   
+   
 This is my CS50P final project, Linear Algebra Calculator. This is simple GUI application, implmented in python using tkinter library that can proform basic vector and matrix operations. 
 
 I have used tkinter library to implement GUI.
@@ -45,25 +63,7 @@ Linear Algebra is based on objects known as vectors and matrices. Both vectors a
   If you have any suggestions or coomnts, please kindly provide it to me.
   Thanks
 
-  Here are some screenshots (of youtube video) of the application:
-  ![alt text](screenshots/home_window.png)
-  ![alt text](screenshots/vector_window.png)
-  ![alt text](screenshots/general_vector_input.png)
-  ![alt text](screenshots/general_vector_result.png)
-  ![alt text](screenshots/input_result_vector.png)
-  ![alt text](screenshots/matrix_window.png)
-  ![alt text](screenshots/general_matrix_input.png)
-
   
-  ![alt text](screenshots/general_matrix_input2.png)
-  ![alt text](screenshots/general_matrix_input3.png) 
-
-  
-  ![alt text](screenshots/general_matrix_result.png)
-   
-   
-
-
 
    
 
